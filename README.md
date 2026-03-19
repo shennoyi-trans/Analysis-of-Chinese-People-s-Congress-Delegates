@@ -36,7 +36,7 @@
   "provider": "deepseek",  
   "api_key": "your_api_key_here",  
   "model": "deepseek-chat",  
-  "max_concurrency": 5,  
+  "max_concurrency": 10,  
   "npc_term": 14  
 }
 ```
