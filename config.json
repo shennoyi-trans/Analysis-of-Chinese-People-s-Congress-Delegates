@@ -1,7 +1,8 @@
 {
-    "provider": "deepseek",
-    "api_key": "api_key",
-    "model": "deepseek-chat",
-    "base_url": "https://api.deepseek.com",
-    "max_concurrency": 50
+  "provider": "deepseek",
+  "api_key": "your_api_key_here",
+  "model": "deepseek-chat",
+  "base_url": "https://api.deepseek.com",
+  "max_concurrency": 10,
+  "npc_term": 14
 }

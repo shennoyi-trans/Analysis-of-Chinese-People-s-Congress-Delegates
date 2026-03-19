@@ -1,317 +1,144 @@
-<<<<<<< HEAD
-# 🧠 Delegate Classifier (人大代表身份分类工具)
-
-一个基于 LLM 的自动化工具，用于：
-
-- 批量读取代表名单（CSV）
-    
-- 自动查询代表公开信息（通过 LLM）
-    
-- 分类其身份结构
-    
-- 检测“政商合一”情况
-    
-- 生成统计结果与可视化图表
-    
-
----
-
-## ✨ 功能特点
-
-### 🔍 自动身份分类
-
-对每位代表进行分类：
-
-- 党政干部
-    
-- 企业家
-    
-- 工农基层代表
-    
-- 解放军和武警系统代表
-    
-- 其他各行业各领域代表
-    
-- 未知
-    
-
----
-
-### ⚠️ 政商合一识别（重点功能）
-
-- 自动识别同时具备 **政界 + 商界身份** 的代表
-    
-- 单独输出名单
-    
-- 提供简要说明
-    
-
----
-
-### ⚡ 并行调用 LLM
-
-- 支持并发请求（可配置）
-    
-- 显著提升处理速度
-    
-
----
-
-### 💾 缓存机制
-
-- 自动缓存已查询结果（`cache.json`）
-    
-- 避免重复请求，降低成本
-    
-- 支持增量运行
-    
-
----
-
-### 📊 可视化输出
-
-自动生成：
-
-- 分类统计表
-    
-- 柱状图（PNG）
-    
-
----
-
-## 📂 项目结构
-
-```text
-your_folder/
-├─ delegate_classifier.exe   # 编译后的程序
-├─ config.json              # LLM配置
-├─ delegates.csv            # 输入名单
-├─ output/                  # 自动生成
-│   ├─ results.csv
-│   ├─ results.json
-│   ├─ summary.csv
-│   ├─ political_business_combo.csv
-│   ├─ chart.png
-│   └─ cache.json
-```
-
----
-
-## 🚀 使用方法
-
-### 1️⃣ 准备 CSV 名单
-
-支持以下格式：
-
-```csv
-name,province
-张三,北京
-李四,上海
-```
-
-或中文表头：
-
-```csv
-姓名,省份
-张三,北京
-李四,上海
-```
-
----
-
-### 2️⃣ 配置 `config.json`
-
-示例：
-
-```json
-{
-  "provider": "deepseek",
-  "api_key": "你的API_KEY",
-  "model": "deepseek-chat",
-  "base_url": "https://api.deepseek.com",
-  "max_concurrency": 5
+# Analysis-of-Chinese-People-s-Congress-Delegates  
+  
+一个用于批量分析全国人大代表身份构成的工具。程序会自动抓取指定届次的人大代表名单，调用 LLM 对每位代表进行身份分类，并生成统计结果与可视化图表。  
+  
+## 主要功能  
+  
+- 自动抓取指定届次全国人大代表名单  
+- 调用 LLM 对代表身份进行分类  
+- 输出分类结果、汇总统计和图表  
+- 支持缓存，避免重复请求已处理过的数据  
+- 支持并发处理，提高整体速度  
+  
+## 分类范围  
+  
+程序将代表划分为以下几类：  
+  
+- 党政干部  
+- 企业家  
+- 工农基层代表  
+- 解放军和武警系统代表  
+- 其他各行业各领域代表  
+- 未知  
+  
+同时还会额外标记是否存在“政商合一”情况。  
+  
+---  
+  
+## 使用方法  
+  
+### 1. 配置 API Key  
+  
+打开程序同目录下的 `config.json` 文件，在其中填入你自己的 API Key。  
+  
+```json  
+{  
+  "provider": "deepseek",  
+  "api_key": "your_api_key_here",  
+  "model": "deepseek-chat",  
+  "max_concurrency": 5,  
+  "npc_term": 14  
 }
 ```
 
-参数说明：
+其中：
+#### `provider`
 
-|字段|说明|
-|---|---|
-|provider|LLM提供商（仅记录用）|
-|api_key|API Key|
-|model|使用的模型|
-|base_url|接口地址|
-|max_concurrency|最大并发数|
+LLM 提供商名称。当前示例使用的是：
 
----
+"provider": "deepseek"
 
-### 3️⃣ 运行程序
+#### `api_key`
 
-#### 开发模式
+你的 API Key，需要手动填写，否则程序无法调用模型接口。
 
-```bash
-cargo run --release
-```
+"api_key": "your_api_key_here"
 
-#### 或直接运行可执行文件
+#### `model`
 
-```bash
-./delegate_classifier
-```
+使用的模型名称，例如：
 
----
+"model": "deepseek-chat"
 
-### 4️⃣ 查看输出
+请注意模型调用费用，以deepseek-chat为例，单次运行本程序约花费4￥。
 
-所有结果会生成在：
+#### `max_concurrency`
 
-```text
-/output
-```
+最大并发数，用于控制同时发起的请求数量，较大的数值可以缩短程序运行所需的时间。
 
----
+"max_concurrency": 10
 
-## 📊 输出文件说明
+建议不要设得过高，否则可能触发接口限流、风控或认证异常。
 
-### `results.csv`
+#### `npc_term`
 
-完整结果：
+人大届次，例如：
 
-|字段|说明|
-|---|---|
-|name|姓名|
-|province|省份|
-|primary_category|分类|
-|is_political_business_combo|是否政商合一|
-|combo_brief|简要说明|
-|reason|判断依据|
-|confidence|置信度|
-|sources|信息来源|
+"npc_term": 14
 
----
+表示抓取第 14 届全国人大代表名单。
 
-### `summary.csv`
-
-分类统计汇总
-
----
-
-### `political_business_combo.csv`
-
-仅包含“政商合一”代表
-
----
-
-### `chart.png`
-
-分类柱状图
-
----
-
-### `cache.json`
-
-缓存数据（自动生成）
-
----
-
-## ⚙️ 关键设计说明
-
-### 🔹 严格 JSON 输出约束
-
-通过提示词强制 LLM 输出标准 JSON，便于程序解析。
-
----
-
-### 🔹 空行过滤
-
-自动跳过 CSV 中的空行，避免无效调用。
-
----
-
-### 🔹 并发控制
-
-使用 Semaphore 控制并发：
-
-```text
-总耗时 ≈ 数据量 / 并发数
-```
-
----
-
-### 🔹 缓存键设计
-
-```text
-name || province
-```
-
-确保同一代表不会重复请求。
-
----
-
-## ⚠️ 注意事项
-
-### ❗ 关于“联网搜索”
-
-本程序会在提示词中要求 LLM：
-
-> “优先联网搜索公开资料”
-
-但：
-
-- 是否真正联网 **取决于你使用的模型**
     
-- 若模型不支持联网，结果可能基于训练数据推断
+
+### 2. 启动程序
+
+将 `delegate_classifier.exe` 和 `config.json` 放在同一目录下，直接**双击 `delegate_classifier.exe`** 即可运行。
+
+也可在命令提示符中输入`delegate_classifier.exe`启动。
+
+程序会自动：
+
+1. 抓取人大代表名单
+    
+2. 调用 LLM 进行分类
+    
+3. 在 `output` 目录下生成结果文件
     
 
 ---
 
-### ❗ 分类不保证绝对准确
+## 输出文件
 
-该工具适用于：
+程序运行后会在 `output` 目录下生成结果文件，包括：
 
-- 数据探索
+- `delegates.csv`：抓取到的代表名单
     
-- 初步统计
+- `results.csv`：分类结果表
     
-- 结构分析
+- `results.json`：分类结果 JSON
     
-
-不适用于：
-
-- 严格学术统计
+- `summary.csv`：分类汇总统计
     
-- 官方数据发布
-      
-
----
-
-## 🧩 技术栈
-
-- Rust (Tokio async)
+- `political_business_combo.csv`：政商合一代表列表
     
-- Reqwest (HTTP)
+- `chart.png`：统计图表
     
-- Serde (JSON)
-    
-- CSV crate
-    
-- Plotters (图表)
+- `cache.json`：缓存文件
     
 
 ---
 
-## 📜 License
+## 注意事项
 
-MIT
+- 请确保 `config.json` 中已正确填写自己的 API Key
+    
+- 请确保 `delegate_classifier.exe` 与 `config.json` 位于同一目录
+    
+- 若修改了配置文件，保存后重新双击 exe 即可生效
+    
+- 若因接口报错导致结果异常，可删除 `output/cache.json` 后重新运行
+    
 
 ---
 
-## 👀 示例效果
+## 适用场景
 
-运行后你会得到：
+适合用于：
 
-- 📄 自动分类数据
+- 分析人大代表身份结构
     
-- 📊 分类统计图
+- 观察不同类别代表占比
     
-- ⚠️ 政商合一名单
+- 快速生成初步统计与可视化结果
+    
+- 为后续人工复核提供基础数据支持
